@@ -13,8 +13,10 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Import routes
+const usersRoute = require("./routes/users");
 const campaignsRoute = require("./routes/campaigns");
 
+app.use("/user", usersRoute);
 app.use("/campaigns", campaignsRoute);
 
 app.get("/", (req, res) => res.send("Hello World!"));

@@ -6,11 +6,11 @@ const CampaignSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        chapters: [{ type: mongoose.Schema.Types.ObjectId, ref: "chapter" }],
-        encounters: [{ type: mongoose.Schema.Types.ObjectId, ref: "encounter" }],
-        pcs: [{ type: mongoose.Schema.Types.ObjectId, ref: "pc" }],
-        createdAt: Date,
-        modifiedAt: Date
+        author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        chapters: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chapter" }],
+        encounters: [{ type: mongoose.Schema.Types.ObjectId, ref: "Encounter" }],
+        pcs: [{ type: mongoose.Schema.Types.ObjectId, ref: "PC" }],
+        status: { type: String, default: "not-started" }
     },
     { timestamps: true }
 );

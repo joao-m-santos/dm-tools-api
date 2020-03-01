@@ -1,18 +1,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
+const verify = require("./verify");
 
 const Campaign = require("../models/Campaign");
 
 // GET
-router.get("/", (req, res) => {
+router.get("/", verify, (req, res) => {
     Campaign.find({}, (err, campaigns) => {
         if (!err) res.json(campaigns);
         else res.json(err);
     });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", verify, (req, res) => {
     Campaign.findById(req.params.id, (err, campaign) => {
         if (!err) res.json(campaign);
         else res.json(err);
@@ -20,7 +21,7 @@ router.get("/:id", (req, res) => {
 });
 
 // POST
-router.post("/new", (req, res) => {
+router.post("/", verify, (req, res) => {
     const newCampaign = new Campaign({
         name: req.body.name,
         active: false,
@@ -38,7 +39,7 @@ router.post("/new", (req, res) => {
 });
 
 // DELETE
-router.delete("/:id", (req, res) => {
+router.delete("/:id", verify, (req, res) => {
     Campaign.deleteOne({ _id: req.params.id }, (err, result) => {
         if (!err) res.json(result);
         else res.json(err);
@@ -46,12 +47,13 @@ router.delete("/:id", (req, res) => {
 });
 
 // PATCH
-router.patch("/:id", (req, res) => {
+router.patch("/:id", verify, (req, res) => {
     Campaign.updateOne(
         { _id: req.params.id },
         {
             $set: {
-                name: req.body.name
+                name: req.body.name,
+                status: req.body.status
             }
         },
         (err, result) => {
