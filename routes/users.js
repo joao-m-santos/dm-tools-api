@@ -10,16 +10,18 @@ const User = require("../models/User");
 const { signupValidation, loginValidation } = require("../validation");
 const saltRounds = 10;
 
+const selectArgs = "_id name email createdAt updatedAt";
+
 // GET
-router.get("/", (req, res) => {
-    User.find({}, (err, user) => {
+router.get("/", verify, (req, res) => {
+    User.findById(req.user, selectArgs, (err, user) => {
         if (!err) res.json(user);
         else res.json(err);
     });
 });
 
 router.get("/:id", verify, (req, res) => {
-    User.findById(req.params.id, (err, user) => {
+    User.findById(req.params.id, selectArgs, (err, user) => {
         if (!err) res.json(user);
         else res.json(err);
     });
@@ -29,26 +31,26 @@ router.get("/:id", verify, (req, res) => {
 router.post("/signup", (req, res) => {
     // Validate request body
     const { error } = signupValidation(req.body);
-    if (error) res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).send(error.details[0].message);
 
     // Check if user already exists in database
-    User.findOne({ email: req.body.email }).then(result => {
+    User.findOne({ email: req.body.email }).then((result) => {
         if (result) return res.status(400).send("Email already exists.");
         else {
             // Encrypt password
-            bcrypt.hash(req.body.password, saltRounds).then(hash => {
+            bcrypt.hash(req.body.password, saltRounds).then((hash) => {
                 // Create the new user
                 const newUser = new User({
                     name: req.body.name,
                     email: req.body.email,
-                    password: hash
+                    password: hash,
                 });
                 newUser
                     .save()
-                    .then(data => {
-                        res.json(data);
+                    .then(() => {
+                        res.send("success");
                     })
-                    .catch(err => {
+                    .catch((err) => {
                         res.json(err);
                     });
             });
@@ -59,17 +61,27 @@ router.post("/signup", (req, res) => {
 router.post("/login", (req, res) => {
     // Validate request body
     const { error } = loginValidation(req.body);
-    if (error) res.status(400).send(error.details[0].message);
+
+    if (error) return res.status(400).send(error.details[0].message);
 
     // Check if user already exists in database
     const queryDetails = req.body.email ? { email: req.body.email } : { name: req.body.name };
-    User.findOne(queryDetails).then(user => {
+    User.findOne(queryDetails).then((user) => {
         if (!user) return res.status(400).send("User not found.");
         else {
-            bcrypt.compare(req.body.password, user.password).then(result => {
+            bcrypt.compare(req.body.password, user.password).then((result) => {
                 if (!result) return res.status(400).send("Invalid password.");
                 const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
-                res.header("Authorization", "Bearer " + token).send(token);
+                res.header("Authorization", "Bearer " + token).send({
+                    token: token,
+                    user: {
+                        _id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        createdAt: user.createdAt,
+                        updatedAt: user.updatedAt,
+                    },
+                });
             });
         }
     });

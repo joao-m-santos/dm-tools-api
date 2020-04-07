@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 const usersRoute = require("./routes/users");
 const campaignsRoute = require("./routes/campaigns");
 
-app.use("/user", usersRoute);
+app.use("/users", usersRoute);
 app.use("/campaigns", campaignsRoute);
 
 app.get("/", (req, res) => res.send("Hello World!"));

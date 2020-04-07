@@ -4,13 +4,13 @@ const CampaignSchema = mongoose.Schema(
     {
         name: {
             type: String,
-            required: true
+            required: true,
         },
-        author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
         chapters: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chapter" }],
         encounters: [{ type: mongoose.Schema.Types.ObjectId, ref: "Encounter" }],
         pcs: [{ type: mongoose.Schema.Types.ObjectId, ref: "PC" }],
-        status: { type: String, default: "not-started" }
+        status: { type: String, default: "not-started" },
     },
     { timestamps: true }
 );

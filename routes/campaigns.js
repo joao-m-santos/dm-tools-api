@@ -5,9 +5,11 @@ const verify = require("./verify");
 
 const Campaign = require("../models/Campaign");
 
+const { campaignValidation } = require("../validation");
+
 // GET
 router.get("/", verify, (req, res) => {
-    Campaign.find({}, (err, campaigns) => {
+    Campaign.find({ author: req.user }, (err, campaigns) => {
         if (!err) res.json(campaigns);
         else res.json(err);
     });
@@ -22,20 +24,29 @@ router.get("/:id", verify, (req, res) => {
 
 // POST
 router.post("/", verify, (req, res) => {
-    const newCampaign = new Campaign({
-        name: req.body.name,
-        active: false,
-        chapters: req.body.chapters
-    });
+    const { error } = campaignValidation(req.body);
 
-    newCampaign
-        .save()
-        .then(data => {
-            res.json(data);
-        })
-        .catch(err => {
-            res.json(err);
-        });
+    if (error) return res.status(400).send(error.details[0].message);
+
+    Campaign.findOne({ name: req.body.name }).then((result) => {
+        if (result) return res.status(400).send("A Campaign with this name already exists.");
+        else {
+            const newCampaign = new Campaign({
+                author: req.user,
+                name: req.body.name,
+                active: false,
+            });
+
+            newCampaign
+                .save()
+                .then((data) => {
+                    res.json(data);
+                })
+                .catch((err) => {
+                    res.json(err);
+                });
+        }
+    });
 });
 
 // DELETE
@@ -53,8 +64,8 @@ router.patch("/:id", verify, (req, res) => {
         {
             $set: {
                 name: req.body.name,
-                status: req.body.status
-            }
+                status: req.body.status,
+            },
         },
         (err, result) => {
             if (!err) res.json(result);
