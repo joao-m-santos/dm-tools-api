@@ -15,9 +15,11 @@ app.use(bodyParser.json());
 // Import routes
 const usersRoute = require("./routes/users");
 const campaignsRoute = require("./routes/campaigns");
+const dndRoute = require("./routes/dnd");
 
 app.use("/users", usersRoute);
 app.use("/campaigns", campaignsRoute);
+app.use("/dnd", dndRoute);
 
 app.get("/", (req, res) => res.send("Hello World!"));
 
